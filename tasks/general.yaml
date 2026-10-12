@@ -1,0 +1,89 @@
+- id: math_01
+  category: math
+  prompt: "23 * 17 是多少？只回答數字，不要有其他文字。"
+  grading:
+    type: numeric_tolerance
+    expected: 391
+    tolerance: 0
+
+- id: math_02
+  category: math
+  prompt: "一個長方形長 12 公分、寬 7 公分，面積是多少平方公分？只回答數字。"
+  grading:
+    type: numeric_tolerance
+    expected: 84
+    tolerance: 0
+
+- id: math_03
+  category: math
+  prompt: "若 x + 15 = 42，x 是多少？只回答數字。"
+  grading:
+    type: numeric_tolerance
+    expected: 27
+    tolerance: 0
+
+- id: qa_01
+  category: qa
+  prompt: "台灣最高的山是哪座？只回答山名。"
+  grading:
+    type: contains
+    expected: "玉山"
+
+- id: qa_02
+  category: qa
+  prompt: "地球繞太陽公轉一圈大約需要多少天？只回答數字（天數）。"
+  grading:
+    type: numeric_tolerance
+    expected: 365
+    tolerance: 2
+
+- id: qa_03
+  category: qa
+  prompt: "水的化學式是什麼？只回答化學式。"
+  grading:
+    type: contains
+    expected: "H2O"
+
+- id: qa_04
+  category: qa
+  prompt: "請問一年有幾個月？只回答數字。"
+  grading:
+    type: exact_match
+    expected: "12"
+
+- id: reasoning_01
+  category: reasoning
+  prompt: "小明比小華大 3 歲，小華今年 10 歲，小明今年幾歲？只回答數字。"
+  grading:
+    type: numeric_tolerance
+    expected: 13
+    tolerance: 0
+
+- id: reasoning_02
+  category: reasoning
+  prompt: "如果今天是星期三，那麼 10 天後是星期幾？請用中文回答星期幾（例如：星期一）。"
+  grading:
+    type: contains
+    expected: "星期六"
+
+- id: reasoning_03
+  category: reasoning
+  prompt: "一個籃子裡有 5 顆蘋果，拿走 2 顆後又放入 4 顆，籃子裡現在有幾顆蘋果？只回答數字。"
+  grading:
+    type: numeric_tolerance
+    expected: 7
+    tolerance: 0
+
+- id: format_01
+  category: format
+  prompt: "請用正則表達式風格回答：今天的日期格式範例是 2024-01-15，請直接複製這個字串，不要加其他文字。"
+  grading:
+    type: regex
+    expected: "\\d{4}-\\d{2}-\\d{2}"
+
+- id: format_02
+  category: format
+  prompt: "請列出三種程式語言，用逗號分隔，不要有其他文字。例如：Python, Java, Go"
+  grading:
+    type: regex
+    expected: "\\w+\\s*,\\s*\\w+\\s*,\\s*\\w+"

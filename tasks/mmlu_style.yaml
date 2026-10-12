@@ -1,0 +1,65 @@
+# MMLU 風格的選擇題任務。
+#
+# 官方 MMLU / lm-evaluation-harness 是直接比較模型對每個選項的
+# log-likelihood，但透過一般對話 API（如 Ollama chat）拿不到這個資訊，
+# 所以這裡採用生成式替代方案：prompt 要求「只回答選項字母」，
+# 評分時用 multiple_choice 抓第一個獨立出現的合法字母，完全不做
+# 字串模糊比對，避免選項文字剛好出現在解釋句子裡造成誤判。
+#
+# 參考：https://huggingface.co/blog/open-llm-leaderboard-mmlu
+
+- id: mmlu_geo_01
+  category: mmlu
+  prompt: |
+    請回答下列單選題，只回答選項字母（A/B/C/D），不要有其他文字。
+
+    世界上面積最大的國家是？
+    A. 加拿大
+    B. 中國
+    C. 俄羅斯
+    D. 美國
+  grading:
+    type: multiple_choice
+    expected: C
+
+- id: mmlu_chem_01
+  category: mmlu
+  prompt: |
+    請回答下列單選題，只回答選項字母（A/B/C/D），不要有其他文字。
+
+    常溫常壓下，下列哪一種元素是液態？
+    A. 汞
+    B. 氦
+    C. 鐵
+    D. 碳
+  grading:
+    type: multiple_choice
+    expected: A
+
+- id: mmlu_hist_01
+  category: mmlu
+  prompt: |
+    請回答下列單選題，只回答選項字母（A/B/C/D），不要有其他文字。
+
+    第一次世界大戰結束的年份是？
+    A. 1914
+    B. 1918
+    C. 1939
+    D. 1945
+  grading:
+    type: multiple_choice
+    expected: B
+
+- id: mmlu_cs_01
+  category: mmlu
+  prompt: |
+    請回答下列單選題，只回答選項字母（A/B/C/D），不要有其他文字。
+
+    下列哪一種資料結構是「先進先出」（FIFO）？
+    A. Stack（堆疊）
+    B. Queue（佇列）
+    C. Tree（樹）
+    D. Graph（圖）
+  grading:
+    type: multiple_choice
+    expected: B
