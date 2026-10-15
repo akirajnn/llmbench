@@ -37,3 +37,30 @@ def pass_at_k(n: int, c: int, k: int) -> float:
     if n - c < k:
         return 1.0
     return 1.0 - math.prod((n - c - i) / (n - i) for i in range(k))
+
+
+def mcnemar_exact(b: int, c: int) -> float:
+    """McNemar exact test（雙尾）：兩個模型答同一批題目時的配對檢定。
+
+    b、c 是「不一致」的題數（A 對 B 錯、A 錯 B 對）；兩邊都對或都錯的題目
+    不提供差異資訊。虛無假設下 b ~ Binomial(b+c, 0.5)，用精確二項分布算 p 值，
+    小樣本也適用。比起把兩個模型的通過率當成獨立樣本比較（看 CI 是否重疊），
+    配對檢定扣掉了「題目本身難易」的變異，同樣題數下檢定力高得多。
+    """
+    n = b + c
+    if n == 0:
+        return 1.0
+    tail = sum(math.comb(n, i) for i in range(min(b, c) + 1)) / 2**n
+    return min(1.0, 2 * tail)
+
+
+def paired_diff_interval(b: int, c: int, n: int, z: float = 1.96) -> tuple[float, float, float]:
+    """配對比例差 (b - c) / n 與其 Wald 信賴區間，回傳 (diff, low, high)。
+
+    n 是兩個模型都有作答的總題數（含一致的題目）。
+    """
+    if n == 0:
+        return 0.0, 0.0, 0.0
+    diff = (b - c) / n
+    se = math.sqrt(max(b + c - (b - c) ** 2 / n, 0.0)) / n
+    return diff, max(-1.0, diff - z * se), min(1.0, diff + z * se)

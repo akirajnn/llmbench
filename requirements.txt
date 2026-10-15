@@ -1,2 +1,3 @@
-ollama>=0.4.0
+ollama>=0.4.0  # 只跑雲端模型時可不裝
 pyyaml>=6.0
+pymupdf>=1.24  # 只有 moex-to-csv（考選部 PDF 轉 CSV）需要

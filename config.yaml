@@ -1,6 +1,39 @@
 models:
+  # 字串 = 本機 Ollama 模型
   - qwen2.5:7b
   - ornith:latest
+
+  # 雲端錨點模型（需設定對應的 API key 環境變數）。
+  # 送往雲端的題目請只用公開題或去識別化／合成資料，不可含真實病歷。
+  # 不需要時整段註解掉即可。
+  # - name: gpt-anchor
+  #   provider: openai            # 任何 OpenAI 相容端點
+  #   model: gpt-4o-mini          # 請填實際要比較的模型版本
+  #   api_key_env: OPENAI_API_KEY
+  # - name: claude-anchor
+  #   provider: anthropic
+  #   model: claude-sonnet-4-5    # 請填實際要比較的模型版本
+  #   api_key_env: ANTHROPIC_API_KEY
+  # - name: gemini-anchor
+  #   provider: openai            # Gemini 的 OpenAI 相容端點
+  #   base_url: https://generativelanguage.googleapis.com/v1beta/openai
+  #   model: gemini-2.5-flash
+  #   api_key_env: GEMINI_API_KEY
+
+# 錨點模型名稱（對應上面的 name）。設定後報表會多一張
+# 「各分類相對 baseline 的比例」表，也可用 --baseline 臨時指定。
+# baseline: claude-anchor
+
+# rubric 題（開放式情境題，例如 tasks/tw_hospital_admin.yaml）的評審模型。
+# 格式同 models 的項目；字串會先比對 models 的 name，找不到才當成 Ollama 模型。
+# 評審有偏好自家回答的偏差，請不要用 baseline 或任何受測模型當評審。
+# 也可用 --judge 臨時指定。
+# judge:
+#   name: judge
+#   provider: openai
+#   model: gpt-4.1               # 請填實際使用的版本
+#   api_key_env: OPENAI_API_KEY
+#   max_tokens: 1024
 
 tasks:
   - tasks/general.yaml
@@ -8,11 +41,14 @@ tasks:
   - tasks/gsm8k_style.yaml
 
 options:
-  # 每個 (model, task) 的 timeout，單位秒
+  # 每個 (model, task) 的 timeout，單位秒（本地與雲端皆適用）
   timeout: 120
   # 是否開啟模型的 thinking 模式（支援的模型才有效）
   # true / false / 省略或 null = 用模型預設值
   # think: false
+  # 取樣溫度。跨模型比較時建議固定（如 0），避免各家預設值不同造成偏差。
+  # 省略 = 用各模型預設值
+  temperature: 0
   # 每題重複抽樣次數。>1 時會額外算 pass@k（Codex/HumanEval 論文的
   # unbiased estimator）與 Wilson 信賴區間，統計上比單次抽樣可靠，
   # 但跑的次數會變成 N 倍，耗時也會變成 N 倍。

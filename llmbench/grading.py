@@ -12,6 +12,8 @@ class GradeResult:
     # IFEval 風格的「寬鬆分數」(0~1)：預設等同 passed 的 0/1，
     # 只有 `checks`（複合條件）這種評分器才會給出介於中間的部分分數。
     score: float = field(default=None)  # type: ignore[assignment]
+    # rubric 評分器專用：評審判定回答出現重大錯誤
+    critical: bool = False
 
     def __post_init__(self):
         if self.score is None:
@@ -70,7 +72,7 @@ def grade_numeric_tolerance(response: str, expected: float, tolerance: float = 0
     return GradeResult(passed, f"expected={expected} tolerance={tolerance} actual={value}")
 
 
-def grade_multiple_choice(response: str, expected: str, choices: str = "ABCD") -> GradeResult:
+def grade_multiple_choice(response: str, expected: str | list[str], choices: str = "ABCD") -> GradeResult:
     """MMLU 風格的選擇題評分：只抓獨立出現的選項字母，不做字串模糊比對。
 
     官方 MMLU/lm-evaluation-harness 是比較各選項的 log-likelihood，
@@ -80,13 +82,19 @@ def grade_multiple_choice(response: str, expected: str, choices: str = "ABCD") -
     出現在解釋句子裡造成的誤判。
     """
     normalized = _normalize(response).strip()
-    pattern = rf"\b([{choices}])\b"
-    match = re.search(pattern, normalized, re.IGNORECASE)
+    # 不用 \b：中文字在 Python 也算 \w，「答案是C」之間沒有字界，會抓不到。
+    # 改用「前後不是英文字母」的 lookaround，並只認大寫，避免把英文冠詞 a
+    # 誤判成選項 A。
+    pattern = rf"(?<![A-Za-z])([{choices.upper()}])(?![A-Za-z])"
+    match = re.search(pattern, normalized)
     if match is None:
         return GradeResult(False, f"no valid choice letter ({choices}) found in response: {normalized!r}")
     picked = match.group(1).upper()
-    passed = picked == str(expected).strip().upper()
-    return GradeResult(passed, f"expected={expected} picked={picked}")
+    # list 代表多個答案都算對（如國考公告「A、C 均給分」的更正答案）
+    accepted = expected if isinstance(expected, list) else [expected]
+    passed = picked in {str(e).strip().upper() for e in accepted}
+    shown = "/".join(str(e) for e in accepted)
+    return GradeResult(passed, f"expected={shown} picked={picked}")
 
 
 def grade_gsm8k(response: str, expected: float, tolerance: float = 0, delimiter: str = "####") -> GradeResult:
@@ -156,6 +164,8 @@ GRADERS = {
 
 def grade(response: str, grading: dict) -> GradeResult:
     grading_type = grading["type"]
+    if grading_type == "rubric":
+        raise ValueError("rubric 需要評審模型，不能放在 checks 子條件或直接呼叫 grade()")
     if grading_type not in GRADERS:
         raise ValueError(f"unknown grading type: {grading_type}")
     return GRADERS[grading_type](response, grading)
